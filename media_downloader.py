@@ -94,35 +94,19 @@ async def _get_media_meta(
     media_obj: Union[Audio, Document, Photo, Video, VideoNote, Voice],
     _type: str,
 ) -> Tuple[str, Optional[str]]:
-    """Extract file name and file id from media object.
-
-    Parameters
-    ----------
-    media_obj: Union[Audio, Document, Photo, Video, VideoNote, Voice]
-        Media object to be extracted.
-    _type: str
-        Type of media object.
-
-    Returns
-    -------
-    Tuple[str, Optional[str]]
-        file_name, file_format
-    """
+    """Extract file name and file id from media object."""
     if _type in ["audio", "document", "video"]:
-        # pylint: disable = C0301
         file_format: Optional[str] = media_obj.mime_type.split("/")[-1]  # type: ignore
     else:
         file_format = None
-
     if _type in ["voice", "video_note"]:
-        # pylint: disable = C0209
         file_format = media_obj.mime_type.split("/")[-1]  # type: ignore
         file_name: str = os.path.join(
             THIS_DIR,
             _type,
             "{}_{}.{}".format(
                 _type,
-                media_obj.date.isoformat(),  # type: ignore
+                media_obj.date.isoformat().replace(":", "-"),  # Замена ':' на '-'
                 file_format,
             ),
         )
@@ -131,7 +115,7 @@ async def _get_media_meta(
             THIS_DIR, _type, getattr(media_obj, "file_name", None) or ""
         )
     return file_name, file_format
-
+    
 
 async def download_media(
     client: pyrogram.client.Client,
